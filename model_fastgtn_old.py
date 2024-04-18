@@ -7,7 +7,10 @@ from gcn import GCNConv
 import torch_sparse
 from torch_geometric.utils import softmax
 from utils import _norm, generate_non_local_graph
-import os
+
+
+device = f'cuda' if torch.cuda.is_available() else 'cpu'
+
 class FastGTNs(nn.Module):
     def __init__(self, num_edge_type, w_in, num_class, num_nodes, args=None):
         super(FastGTNs, self).__init__()
@@ -26,11 +29,11 @@ class FastGTNs(nn.Module):
         if args.dataset == "PPI":
             self.m = nn.Sigmoid()
             self.loss = nn.BCELoss()
-        else:
+        else:    
             self.loss = nn.CrossEntropyLoss()
         
     def forward(self, A, X, target_x, target, num_nodes=None, eval=False, args=None, n_id=None, node_labels=None, epoch=None):
-        if num_nodes is None:
+        if num_nodes == None:
             num_nodes = self.num_nodes
         H_, Ws = self.fastGTNs[0](A, X, num_nodes=num_nodes, epoch=epoch)
         for i in range(1, self.num_FastGTN_layers):
@@ -43,29 +46,8 @@ class FastGTNs(nn.Module):
                 loss = self.loss(self.m(y), target)
             else:
                 loss = self.loss(y, target.squeeze())
-
-            # Print and save the filters for each layer
-            for layer_idx, filters in enumerate(Ws):
-                self.print_and_save_filters(filters, layer_idx)
-
-            return loss, y, Ws
-
-    def print_and_save_filters(self, filters, layer_idx):
-        print("Layer:", layer_idx)
-        for filter_idx, filter_tensor in enumerate(filters):
-            print("Filter", filter_idx, "is:")
-            print(filter_tensor)
-            print("Filter size:", filter_tensor.size())
-            # Save the filters to disk
-            self.save_filters_to_disk(filter_tensor, layer_idx, filter_idx)
-
-    def save_filters_to_disk(self, filter_tensor, layer_idx, filter_idx):
-        dataset_name = self.args.dataset
-        save_dir = os.path.join("/data/filters", dataset_name)
-        os.makedirs(save_dir, exist_ok=True)
-        file_path = os.path.join(save_dir, f"layer_{layer_idx}_channel_{filter_idx}.pt")
-        torch.save(filter_tensor, file_path)
-        print(f"Filter {filter_idx} saved to:", file_path)
+        print(Ws)
+        return loss, y, Ws
 
 class FastGTN(nn.Module):
     def __init__(self, num_edge_type, w_in, num_class, num_nodes, args=None, pre_trained=None):

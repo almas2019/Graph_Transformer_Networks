@@ -53,11 +53,11 @@ if __name__ == '__main__':
     weight_decay = args.weight_decay
     num_layers = args.num_layers
 
-    with open('../data/%s/node_features.pkl' % args.dataset,'rb') as f:
+    with open('../Graph_Transformer_Networks/data/%s/node_features.pkl' % args.dataset,'rb') as f:
         node_features = pickle.load(f)
-    with open('../data/%s/edges.pkl' % args.dataset,'rb') as f:
+    with open('../Graph_Transformer_Networks/data/%s/edges.pkl' % args.dataset,'rb') as f:
         edges = pickle.load(f)
-    with open('../data/%s/labels.pkl' % args.dataset,'rb') as f:
+    with open('../Graph_Transformer_Networks/data/%s/labels.pkl' % args.dataset,'rb') as f:
         labels = pickle.load(f)
     if args.dataset == 'PPI':
         with open('../data/%s/ppi_tvt_nids.pkl' % args.dataset, 'rb') as fp:
