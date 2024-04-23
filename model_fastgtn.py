@@ -61,9 +61,9 @@ class FastGTNs(nn.Module):
 
     def save_filters_to_disk(self, filter_tensor, layer_idx, filter_idx):
         dataset_name = self.args.dataset
-        save_dir = os.path.join("/data/filters", dataset_name)
+        save_dir = os.path.join("../Graph_Transformer_Networks/data/", dataset_name)
         os.makedirs(save_dir, exist_ok=True)
-        file_path = os.path.join(save_dir, f"layer_{layer_idx}_channel_{filter_idx}.pt")
+        file_path = os.path.join(save_dir, f"layer_{layer_idx}.pt")
         torch.save(filter_tensor, file_path)
         print(f"Filter {filter_idx} saved to:", file_path)
 

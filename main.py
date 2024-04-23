@@ -151,7 +151,7 @@ if __name__ == '__main__':
         best_test_f1, best_micro_test_f1 = 0, 0
         
         for i in range(epochs):
-            # print('Epoch ',i)
+            print('Epoch ',i)
             model.zero_grad()
             model.train()
             if args.model == 'FastGTN':
@@ -165,8 +165,8 @@ if __name__ == '__main__':
             else:
                 train_f1 = torch.mean(f1_score(torch.argmax(y_train.detach(),dim=1), train_target, num_classes=num_classes)).cpu().numpy()
                 sk_train_f1 = sk_f1_score(train_target.detach().cpu(), np.argmax(y_train.detach().cpu(), axis=1), average='micro')
-            # print(W)
-            # print('Train - Loss: {}, Macro_F1: {}, Micro_F1: {}'.format(loss.detach().cpu().numpy(), train_f1, sk_train_f1))
+            print(W)
+            print('Train - Loss: {}, Macro_F1: {}, Micro_F1: {}'.format(loss.detach().cpu().numpy(), train_f1, sk_train_f1))
             
             loss.backward()
             optimizer.step()
@@ -184,7 +184,7 @@ if __name__ == '__main__':
                 else:
                     val_f1 = torch.mean(f1_score(torch.argmax(y_valid,dim=1), valid_target, num_classes=num_classes)).cpu().numpy()
                     sk_val_f1 = sk_f1_score(valid_target.detach().cpu(), np.argmax(y_valid.detach().cpu(), axis=1), average='micro')
-                # print('Valid - Loss: {}, Macro_F1: {}, Micro_F1: {}'.format(val_loss.detach().cpu().numpy(), val_f1, sk_val_f1))
+                print('Valid - Loss: {}, Macro_F1: {}, Micro_F1: {}'.format(val_loss.detach().cpu().numpy(), val_f1, sk_val_f1))
 
                 if args.model == 'FastGTN':
                     test_loss, y_test,W = model.forward(A, node_features, test_node, test_target, epoch=i)
@@ -197,7 +197,7 @@ if __name__ == '__main__':
                 else:
                     test_f1 = torch.mean(f1_score(torch.argmax(y_test,dim=1), test_target, num_classes=num_classes)).cpu().numpy()
                     sk_test_f1 = sk_f1_score(test_target.detach().cpu(), np.argmax(y_test.detach().cpu(), axis=1), average='micro')
-                # print('Test - Loss: {}, Macro_F1: {}, Micro_F1:{} \n'.format(test_loss.detach().cpu().numpy(), test_f1, sk_test_f1))
+                print('Test - Loss: {}, Macro_F1: {}, Micro_F1:{} \n'.format(test_loss.detach().cpu().numpy(), test_f1, sk_test_f1))
             if sk_val_f1 > best_micro_val_f1:
                 best_val_loss = val_loss.detach().cpu().numpy()
                 best_test_loss = test_loss.detach().cpu().numpy()
