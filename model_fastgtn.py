@@ -9,7 +9,7 @@ from torch_geometric.utils import softmax
 from utils import _norm, generate_non_local_graph
 import os
 class FastGTNs(nn.Module):
-    def __init__(self, num_edge_type, w_in, num_class, num_nodes, args=None):
+    def __init__(self, num_edge_type, w_in, num_class, num_nodes, args=None,output_folder=None): #added output folder
         super(FastGTNs, self).__init__()
         self.args = args
         self.num_nodes = num_nodes
@@ -28,8 +28,8 @@ class FastGTNs(nn.Module):
             self.loss = nn.BCELoss()
         else:
             self.loss = nn.CrossEntropyLoss()
-        
-    def forward(self, A, X, target_x, target, num_nodes=None, eval=False, args=None, n_id=None, node_labels=None, epoch=None):
+        self.output_folder=output_folder
+    def forward(self, A, X, target_x, target, num_nodes=None, eval=False, args=None, n_id=None, node_labels=None, epoch=None,layer_split=None):
         if num_nodes is None:
             num_nodes = self.num_nodes
         H_, Ws = self.fastGTNs[0](A, X, num_nodes=num_nodes, epoch=epoch)
@@ -46,26 +46,29 @@ class FastGTNs(nn.Module):
 
             # Print and save the filters for each layer
             for layer_idx, filters in enumerate(Ws):
-                self.print_and_save_filters(filters, layer_idx)
+                self.print_and_save_filters(filters, layer_idx,layer_split)
 
             return loss, y, Ws
 
-    def print_and_save_filters(self, filters, layer_idx):
+    def print_and_save_filters(self, filters, layer_idx,split):
         print("Layer:", layer_idx)
         for filter_idx, filter_tensor in enumerate(filters):
             print("Filter", filter_idx, "is:")
             print(filter_tensor)
             print("Filter size:", filter_tensor.size())
             # Save the filters to disk
-            self.save_filters_to_disk(filter_tensor, layer_idx, filter_idx)
+            self.save_filters_to_disk(filter_tensor, layer_idx, filter_idx,split)
 
-    def save_filters_to_disk(self, filter_tensor, layer_idx, filter_idx):
-        dataset_name = self.args.dataset
-        save_dir = os.path.join("../Graph_Transformer_Networks/data/", dataset_name)
-        os.makedirs(save_dir, exist_ok=True)
-        file_path = os.path.join(save_dir, f"layer_{layer_idx}.pt")
-        torch.save(filter_tensor, file_path)
-        print(f"Filter {filter_idx} saved to:", file_path)
+    def save_filters_to_disk(self, filter_tensor, layer_idx, filter_idx,split):
+        if split is not None:
+            save_dir = self.output_folder
+            runs=self.args.runs
+            os.makedirs(save_dir, exist_ok=True)
+            file_path = os.path.join(save_dir, f"layer_{layer_idx}_{split}_{runs}.pt")
+            torch.save(filter_tensor, file_path)
+            print(f"Filter {filter_idx} saved to:", file_path)
+        else:
+            print(f"The {split} split layers are not saved")
 
 class FastGTN(nn.Module):
     def __init__(self, num_edge_type, w_in, num_class, num_nodes, args=None, pre_trained=None):

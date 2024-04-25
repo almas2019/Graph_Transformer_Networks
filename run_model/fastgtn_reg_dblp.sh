@@ -3,7 +3,7 @@
 #SBATCH --gres=gpu:1        # Request GPU "generic resources"
 #SBATCH --cpus-per-task=6  # Cores proportional to GPUs: 6 on Cedar, 16 on Graham.
 #SBATCH --mem=31500M        # Memory proportional to GPUs: 31500 Cedar, 63500 Graham.
-#SBATCH -J reg_imdb
+#SBATCH -J reg_dblp
 #SBATCH -N 1
 # ---------------------------------------------------------------------
 echo "Current working directory: $(pwd)"
@@ -22,6 +22,6 @@ nvidia-smi
 
 
 cd /home/almas/projects/def-gregorys/almas/Graph_Transformer_Networks
-python main.py --dataset IMDB --model FastGTN --num_layers 4 --epoch 50 --lr 0.02 --channel_agg mean --num_channels 1 --save_metrics
+python main.py --dataset DBLP --model FastGTN --num_layers 4 --epoch 100 --lr 0.02 --channel_agg mean --num_channels 2 --save_metrics
 
 

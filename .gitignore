@@ -4,3 +4,4 @@ data
 slurm-*
 __pycache__/utils.cpython-310.pyc
 *.pyc
+R-*

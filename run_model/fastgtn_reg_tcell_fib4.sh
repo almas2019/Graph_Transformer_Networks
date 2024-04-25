@@ -22,6 +22,6 @@ nvidia-smi
 
 
 cd /home/almas/projects/def-gregorys/almas/Graph_Transformer_Networks
-python main.py --dataset graph_het_subsampled_tcell_fib4 --model FastGTN --num_layers 2 --epoch 100 --lr 0.01 --channel_agg mean --num_channels 2
+python main.py --dataset graph_het_subsampled_tcell_fib4 --model FastGTN --num_layers 2 --epoch 100 --lr 0.01 --channel_agg mean --num_channels 2 --save_metrics
 
 
