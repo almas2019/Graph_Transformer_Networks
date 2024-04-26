@@ -22,6 +22,6 @@ nvidia-smi
 
 
 cd /home/almas/projects/def-gregorys/almas/Graph_Transformer_Networks
-python main.py --dataset IMDB --model FastGTN --num_layers 4 --epoch 50 --lr 0.02 --channel_agg mean --num_channels 1 --save_metrics
+python main.py --dataset IMDB --model FastGTN --num_layers 4 --epoch 500 --lr 0.02 --channel_agg mean --num_channels 1 --save_metrics --runs 1
 
 
