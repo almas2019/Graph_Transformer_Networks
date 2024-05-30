@@ -8,6 +8,7 @@ import torch_sparse
 from torch_geometric.utils import softmax
 from utils import _norm, generate_non_local_graph
 import os
+import scipy.sparse as sp
 class FastGTNs(nn.Module):
     def __init__(self, num_edge_type, w_in, num_class, num_nodes, args=None,output_folder=None): #added output folder
         super(FastGTNs, self).__init__()
@@ -32,17 +33,31 @@ class FastGTNs(nn.Module):
     def forward(self, A, X, target_x, target, num_nodes=None, eval=False, args=None, n_id=None, node_labels=None, epoch=None,layer_split=None):
         if num_nodes is None:
             num_nodes = self.num_nodes
-        H_, Ws = self.fastGTNs[0](A, X, num_nodes=num_nodes, epoch=epoch)
+           # Perform sparse input processing
+        # Perform sparse input processing if specified
+        if self.args.sparse_features:
+            if not X.is_sparse:
+                # Convert dense numpy/scipy matrix to PyTorch tensor
+                if isinstance(X, np.ndarray):
+                    X = torch.FloatTensor(X)
+                # Convert scipy sparse matrix to PyTorch sparse tensor
+                elif isinstance(X, sp.csc_matrix):
+                    X = csc_to_torch_sparse_tensor(X)
+                else:
+                    raise ValueError("Unsupported data type for sparse features.")
         for i in range(1, self.num_FastGTN_layers):
             H_, Ws = self.fastGTNs[i](A, H_, num_nodes=num_nodes)
-        y = self.linear(H_[target_x])
-        if eval:
-            return y
-        else:
-            if self.args.dataset == 'PPI':
-                loss = self.loss(self.m(y), target)
+            H_, Ws = self.fastGTNs[0](A, X, num_nodes=num_nodes, epoch=epoch)
+            for i in range(1, self.num_FastGTN_layers):
+                H_, Ws = self.fastGTNs[i](A, H_, num_nodes=num_nodes)
+            y = self.linear(H_[target_x])
+            if eval:
+                return y
             else:
-                loss = self.loss(y, target.squeeze())
+                if self.args.dataset == 'PPI':
+                    loss = self.loss(self.m(y), target)
+                else:
+                    loss = self.loss(y, target.squeeze())
 
             # Print and save the filters for each layer
             for layer_idx, filters in enumerate(Ws):
@@ -69,6 +84,12 @@ class FastGTNs(nn.Module):
             print(f"Filter {filter_idx} saved to:", file_path)
         else:
             print(f"The {split} split layers are not saved")
+    def csc_to_torch_sparse_tensor(csc_matrix):
+        coo = csc_matrix.tocoo()
+        indices = torch.LongTensor([coo.row, coo.col])
+        values = torch.FloatTensor(coo.data)
+        shape = torch.Size(coo.shape)
+        return torch.sparse.FloatTensor(indices, values, shape)
 
 class FastGTN(nn.Module):
     def __init__(self, num_edge_type, w_in, num_class, num_nodes, args=None, pre_trained=None):
