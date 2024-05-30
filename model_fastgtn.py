@@ -124,8 +124,11 @@ class FastGTN(nn.Module):
         Ws = []
 
         def sp_matrix_mult(X, W):
-            """check if node features are sparse use sparse matrix multiplication"""
-            return torch.sparse.mm(X, W) if X.is_sparse else X @ W
+            """check if node features are sparse and use sparse matrix multiplication if needed"""
+            if torch.is_sparse(X):
+                return torch.sparse.mm(X, W)
+            else:
+                return X @ W
 
         X_ = [sp_matrix_mult(X, W) for W in self.Ws]
         H = [sp_matrix_mult(X, W) for W in self.Ws]

@@ -12,8 +12,8 @@ import copy
 import os
 from datetime import datetime
 import csv	
-from scipy.sparse import csr_matrix
-import scipy.spare as scsparse
+from scipy.sparse import csr_matrix, csc_matrix 
+import scipy.sparse as scsparse
 def write_metric_csv(output_folder, date_time, args, all_epochs_list, all_runs_list, all_train_losses, all_valid_losses, all_test_losses,
                      all_train_macro_f1s, all_train_micro_f1s, all_valid_macro_f1s, all_valid_micro_f1s, all_test_macro_f1s, all_test_micro_f1s):
     os.makedirs(output_folder, exist_ok=True)
@@ -34,9 +34,9 @@ def write_metric_csv(output_folder, date_time, args, all_epochs_list, all_runs_l
                                  all_test_macro_f1s[run_idx][epoch_idx], all_test_micro_f1s[run_idx][epoch_idx]])
     print(f"Metrics data has been saved to {output_file}")
 
-def convert_to_torch_sparse_tensor(scipy_csr_mat):
+def convert_to_torch_sparse_tensor(scipy_sparse_mat):
     """Converts a scipy sparse matrix to a torch sparse tensor."""
-    return torch.sparse_coo_tensor(scipy_csr_mat.nonzero(), scipy_csr_mat.data, scipy_csr_mat.shape).cuda()
+    return torch.sparse_coo_tensor(scipy_sparse_mat.nonzero(), scipy_sparse_mat.data, scipy_sparse_mat.shape).cuda()
 
 
 # Main function
@@ -132,8 +132,8 @@ if __name__ == '__main__':
     num_edge_type = len(A)
      # Convert node features to the appropriate tensor format
     if isinstance(node_features, np.ndarray): # checks type
-        torch.from_numpy(node_features).type(torch.cuda.FloatTensor)
-    elif isinstance(node_features, csr_matrix):
+        node_features= torch.from_numpy(node_features).type(torch.cuda.FloatTensor)
+    elif isinstance(scipy_sparse_mat, (csr_matrix, csc_matrix)): # checks both types of sparse tensors
         node_features = convert_to_torch_sparse_tensor(node_features)
     
     # Process data based on dataset
