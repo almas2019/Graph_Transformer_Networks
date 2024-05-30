@@ -12,8 +12,8 @@ import copy
 import os
 from datetime import datetime
 import csv	
-import scipy.sparse as sp
-
+from scipy.sparse import csr_matrix
+import scipy.spare as scsparse
 def write_metric_csv(output_folder, date_time, args, all_epochs_list, all_runs_list, all_train_losses, all_valid_losses, all_test_losses,
                      all_train_macro_f1s, all_train_micro_f1s, all_valid_macro_f1s, all_valid_micro_f1s, all_test_macro_f1s, all_test_micro_f1s):
     os.makedirs(output_folder, exist_ok=True)
@@ -34,13 +34,9 @@ def write_metric_csv(output_folder, date_time, args, all_epochs_list, all_runs_l
                                  all_test_macro_f1s[run_idx][epoch_idx], all_test_micro_f1s[run_idx][epoch_idx]])
     print(f"Metrics data has been saved to {output_file}")
 
-def convert_to_torch_sparse_tensor(scipy_sparse_matrix):
+def convert_to_torch_sparse_tensor(scipy_csr_mat):
     """Converts a scipy sparse matrix to a torch sparse tensor."""
-    coo = scipy_sparse_matrix.tocoo()
-    indices = torch.LongTensor([coo.row, coo.col])
-    values = torch.FloatTensor(coo.data)
-    shape = torch.Size(coo.shape)
-    return torch.sparse.FloatTensor(indices, values, shape)
+    return torch.sparse_coo_tensor(scipy_csr_mat.nonzero(), scipy_csr_mat.data, scipy_csr_mat.shape).cuda()
 
 
 # Main function
@@ -72,7 +68,6 @@ if __name__ == '__main__':
     parser.add_argument('--save_metrics', action='store_true', help="save metrics?")
     parser.add_argument('--layer_split', type=str, default='train', help="which layer to save weights")
     parser.add_argument('--data_path', type=str, default=None, help='alternative data location')
-    parser.add_argument('--sparse_features', action='store_true', help="Indicate if node features are sparse")
 
 
     # Get current date and time
@@ -135,22 +130,11 @@ if __name__ == '__main__':
     value_tmp = torch.ones(num_nodes).type(torch.cuda.FloatTensor)
     A.append((edge_tmp, value_tmp))
     num_edge_type = len(A)
-    
-    # Convert node features to tensor
-# Convert node features to sparse tensors if flag is set
-    if args.sparse_features:
-        # Check if node_features is already a PyTorch sparse tensor
-        if not torch.is_tensor(node_features) or not node_features.is_sparse:
-            # Convert scipy sparse matrix to PyTorch sparse tensor
-            if isinstance(node_features, sp.csc_matrix):
-                node_features = convert_to_torch_sparse_tensor(node_features)
-            elif isinstance(node_features, np.ndarray):
-                # Convert dense numpy array to PyTorch dense tensor
-                node_features = torch.FloatTensor(node_features).to(torch.device('cuda'))
-            else:
-                raise ValueError("Unsupported data type for sparse features.")
-    else:
-        node_features = torch.from_numpy(node_features).type(torch.cuda.FloatTensor)
+     # Convert node features to the appropriate tensor format
+    if isinstance(node_features, np.ndarray): # checks type
+        torch.from_numpy(node_features).type(torch.cuda.FloatTensor)
+    elif isinstance(node_features, csr_matrix):
+        node_features = convert_to_torch_sparse_tensor(node_features)
     
     # Process data based on dataset
     if args.dataset == 'PPI':
