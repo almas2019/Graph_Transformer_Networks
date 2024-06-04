@@ -133,7 +133,7 @@ if __name__ == '__main__':
      # Convert node features to the appropriate tensor format
     if isinstance(node_features, np.ndarray): # checks type
         node_features= torch.from_numpy(node_features).type(torch.cuda.FloatTensor)
-    elif isinstance(scipy_sparse_mat, (csr_matrix, csc_matrix)): # checks both types of sparse tensors
+    elif isinstance(node_features, (csr_matrix, csc_matrix)): # checks both types of sparse tensors
         node_features = convert_to_torch_sparse_tensor(node_features)
     
     # Process data based on dataset
