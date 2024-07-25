@@ -65,9 +65,10 @@ if __name__ == '__main__':
     parser.add_argument('--K', type=int, default=1, help='number of non-local negibors')
     parser.add_argument("--pre_train", action='store_true', help="pre-training FastGT layers")
     parser.add_argument('--num_FastGTN_layers', type=int, default=1, help='number of FastGTN layers')
-    parser.add_argument('--save_metrics', action='store_true', help="save metrics?")
     parser.add_argument('--layer_split', type=str, default='train', help="which layer to save weights")
     parser.add_argument('--data_path', type=str, default=None, help='alternative data location')
+    parser.add_argument('--save_model_mode', type=str, default="best_val_loss", help='which measure to save model on-one of best_val_loss, best_f1_score, last_epoch')
+
 
 
     # Get current date and time
@@ -314,50 +315,116 @@ if __name__ == '__main__':
                 print('Test - Loss: {}, Macro_F1: {}, Micro_F1: {}'.format(test_loss.detach().cpu().numpy(), test_f1, sk_test_f1))
             
             # Save the best model based on validation loss
-            if val_loss < best_val_loss:
-                best_val_loss = val_loss
-                best_test_loss = test_loss
-                best_train_loss = loss
-                best_train_f1 = val_f1
-                best_micro_train_f1 = sk_val_f1
-                best_val_f1 = val_f1
-                best_micro_val_f1 = sk_val_f1
-                best_test_f1 = test_f1
-                best_micro_test_f1 = sk_test_f1
-                tmp = model.state_dict()
+            if args.save_model_mode=="best_val_loss":
+                if val_loss < best_val_loss:
+                    best_val_loss = val_loss
+                    best_test_loss = test_loss
+                    best_train_loss = loss
+                    best_train_f1 = val_f1
+                    best_micro_train_f1 = sk_val_f1
+                    best_val_f1 = val_f1
+                    best_micro_val_f1 = sk_val_f1
+                    best_test_f1 = test_f1
+                    best_micro_test_f1 = sk_test_f1
+                    #tmp = model.state_dict()
+                    tmp=model
         
-        # Print metrics for the best model
-        print('Best val loss:', best_val_loss)
-        print('Best train loss:', best_train_loss)
-        print('Best test loss:', best_test_loss)
-        print('Best val Macro F1:', best_val_f1)
-        print('Best val Micro F1:', best_micro_val_f1)
-        print('Best test Macro F1:', best_test_f1)
-        print('Best test Micro F1:', best_micro_test_f1)
+                # Print metrics for the best model
+                print('Best val loss:', best_val_loss)
+                print('Best train loss:', best_train_loss)
+                print('Best test loss:', best_test_loss)
+                print('Best val Macro F1:', best_val_f1)
+                print('Best val Micro F1:', best_micro_val_f1)
+                print('Best test Macro F1:', best_test_f1)
+                print('Best test Micro F1:', best_micro_test_f1)
+                    # Save the best model based on last epoch
+            if args.save_model_mode=="last_epoch":
+                if i==args.epoch-1: # last_epoch
+                    best_val_loss = val_loss
+                    best_test_loss = test_loss
+                    best_train_loss = loss
+                    best_train_f1 = val_f1
+                    best_micro_train_f1 = sk_val_f1
+                    best_val_f1 = val_f1
+                    best_micro_val_f1 = sk_val_f1
+                    best_test_f1 = test_f1
+                    best_micro_test_f1 = sk_test_f1
+                   #tmp = model.state_dict()
+                    tmp=model
+               
+            # Save the best model based on f1 score
+            if args.save_model_mode=="best_f1_score":
+                if f1_score < best_f1_score:
+                    best_val_loss = val_loss
+                    best_test_loss = test_loss
+                    best_train_loss = loss
+                    best_train_f1 = val_f1
+                    best_micro_train_f1 = sk_val_f1
+                    best_val_f1 = val_f1
+                    best_micro_val_f1 = sk_val_f1
+                    best_test_f1 = test_f1
+                    best_micro_test_f1 = sk_test_f1
+                    tmp = model.state_dict()
+        
+                # Print metrics for the best model
+                print('Last epoch val loss:', best_val_loss)
+                print('Last epoch train loss:', best_train_loss)
+                print('Last epoch test loss:', best_test_loss)
+                print('Last epoch Macro F1:', best_val_f1)
+                print('Last epoch Micro F1:', best_micro_val_f1)
+                print('Last epoch Macro F1:', best_test_f1)
+                print('Last epoch Micro F1:', best_micro_test_f1)
+            # Save the best model based on train loss
+            if args.save_model_mode=="best_train_loss":
+                if loss < best_train_loss:
+                    best_val_loss = val_loss
+                    best_test_loss = test_loss
+                    best_train_loss = loss
+                    best_train_f1 = val_f1
+                    best_micro_train_f1 = sk_val_f1
+                    best_val_f1 = val_f1
+                    best_micro_val_f1 = sk_val_f1
+                    best_test_f1 = test_f1
+                    best_micro_test_f1 = sk_test_f1
+                     #tmp = model.state_dict()
+                    tmp=model
+        
+                # Print metrics for the best model
+                print('Best val loss for best train loss:', best_val_loss)
+                print('Best train loss for best train loss::', best_train_loss)
+                print('Best test loss for best train loss::', best_test_loss)
+                print('Best val Macro F1 for best train loss::', best_val_f1)
+                print('Best val Micro F1 for best train loss::', best_micro_val_f1)
+                print('Best test Macro F1 for best train loss::', best_test_f1)
+                print('Best test Micro F1 for best train loss::', best_micro_test_f1)
         
         # Append metrics for the best model to lists
-        final_f1.append(best_test_f1)
-        final_micro_f1.append(best_micro_test_f1)
-        all_epochs_list.append(epochs_list)
-        all_runs_list.append(runs_list)
-        all_train_losses.append(train_losses)
-        all_valid_losses.append(valid_losses)
-        all_test_losses.append(test_losses)
-        all_train_macro_f1s.append(train_macro_f1s)
-        all_train_micro_f1s.append(train_micro_f1s)
-        all_valid_macro_f1s.append(valid_macro_f1s)
-        all_valid_micro_f1s.append(valid_micro_f1s)
-        all_test_macro_f1s.append(test_macro_f1s)
-        all_test_micro_f1s.append(test_micro_f1s)
+        if args.save_model_mode is not None:
+            final_f1.append(best_test_f1)
+            final_micro_f1.append(best_micro_test_f1)
+            all_epochs_list.append(epochs_list)
+            all_runs_list.append(runs_list)
+            all_train_losses.append(train_losses)
+            all_valid_losses.append(valid_losses)
+            all_test_losses.append(test_losses)
+            all_train_macro_f1s.append(train_macro_f1s)
+            all_train_micro_f1s.append(train_micro_f1s)
+            all_valid_macro_f1s.append(valid_macro_f1s)
+            all_valid_micro_f1s.append(valid_micro_f1s)
+            all_test_macro_f1s.append(test_macro_f1s)
+            all_test_micro_f1s.append(test_micro_f1s)
         
-        # Save the model with the best validation loss
-        if args.save_metrics:
+        # Save the model with
             if args.non_local:
                 torch.save(tmp, os.path.join(output_folder, date_time + '_' + args.model + '_non_local_' + args.dataset + '_best.pt'))
+                with open(os.path.join(output_folder,'args.pkl', 'wb')) as f:
+                    pickle.dump(args, f)
             else:
-                torch.save(tmp, os.path.join(output_folder, date_time + '_' + args.model + '_' + args.dataset + '_best.pt'))
+                torch.save(tmp, os.path.join(output_folder, date_time + '_' + args.model + '_' + args.dataset +'_' + args.save_model_mode+'.pt'))
+                with open(os.path.join(output_folder,'args.pkl', 'wb')) as f:
+                    pickle.dump(args, f)
             write_metric_csv(output_folder, date_time, args, all_epochs_list, all_runs_list, all_train_losses, all_valid_losses, all_test_losses,
-                             all_train_macro_f1s, all_train_micro_f1s, all_valid_macro_f1s, all_valid_micro_f1s, all_test_macro_f1s, all_test_micro_f1s)
+                                all_train_macro_f1s, all_train_micro_f1s, all_valid_macro_f1s, all_valid_micro_f1s, all_test_macro_f1s, all_test_micro_f1s)
 
 
 # model_save_path= os.path.join(output_folder,f'{args.model}_{num_layers}_{num_channels}_{args.runs}.pt')
