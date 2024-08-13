@@ -51,4 +51,4 @@ if __name__ == "__main__":
 # line_loss_alt(data=data, X="Epoch", Y="Train Loss", 9 output_folder="/project/def-gregorys/almas/OpenHGNN/try_hgnn/img/", output_file="tcell_1_train_loss_curve")
 # line_loss_sns(data=data, X="Epoch", Y="Valid Loss", output_folder="/project/def-gregorys/almas/OpenHGNN/try_hgnn/img/", output_file="tcell_1_valid_loss_curve")
 # line_loss_sns(data=data, X="Epoch", Y="Train Loss", output_folder="/project/def-gregorys/almas/OpenHGNN/try_hgnn/img/", output_file="tcell_1_train_loss_curve")
-line_loss_sns(data=data, X="Epoch", Y="Train Loss", run=9, output_folder="/home/almas/projects/def-gregorys/almas/Graph_Transformer_Networks/data/IMDB/", output_file="train_loss_tcell_imdb_run10")
+#line_loss_sns(data=data, X="Epoch", Y="Train Loss", run=9, output_folder="/home/almas/projects/def-gregorys/almas/Graph_Transformer_Networks/data/IMDB/", output_file="train_loss_tcell_imdb_run10")
