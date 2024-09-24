@@ -3,6 +3,8 @@ import torch
 from torch_geometric.nn import GNNExplainer
 from model_fastgtn import FastGTNs
 import argparse
+import scipy.sparse as sp
+import numpy as np
 
 # Load node features, edges, and labels
 with open('/home/almas/projects/def-gregorys/almas/human_lymph_node/for_fastgtn/data/highly_var/node_features.pkl', 'rb') as f:
@@ -11,19 +13,26 @@ with open('/home/almas/projects/def-gregorys/almas/human_lymph_node/for_fastgtn/
 with open('/home/almas/projects/def-gregorys/almas/human_lymph_node/for_fastgtn/data/highly_var/edges.pkl', 'rb') as f:
     edges = pickle.load(f)
 
-with open('/home/almas/projects/def-gregorys/almas/human_lymph_node/for_fastgtn/data/highly_var/labels.pkl', 'rb') as f:
+with open('/home/almas/projects/def-gregorys/almas/human_lymph_node/for_fastgtn/data/highly_var_500_genes/labels.pkl', 'rb') as f:
     labels = pickle.load(f)
 
 # This is with model state save dict instead of whole model which I changed in the current main--> change back to save state?
 
 # Ensure the data is in the correct format
-# Ensure the data is in the correct format
 if sp.issparse(node_features):
     node_features = torch.tensor(node_features.todense(), dtype=torch.float)
 else:
     node_features = torch.tensor(node_features, dtype=torch.float)
-edges = torch.tensor(edges, dtype=torch.long)
-labels = torch.tensor(labels, dtype=torch.long)
+# Convert each edge tensor to dense if it is sparse
+edge_tensors = []
+for edge in edges:
+    if sp.issparse(edge):
+        edge = torch.tensor(edge.todense(), dtype=torch.long)
+    edge_tensors.append(edge)
+
+# Combine all edge tensors into a single edge_index tensor
+edge_index = torch.cat(edge_tensors, dim=1)
+#labels = torch.from_numpy(np.array(labels))
 # Define a function to load the model
 def load_model():
     args = argparse.Namespace( # save args and load instead of configuring manually (waiting for it to run)
@@ -64,4 +73,3 @@ for node_idx in range(node_features.shape[0]):
     print(f"Node {node_idx} - Important Edges: {important_edges}")
 
 
-}")

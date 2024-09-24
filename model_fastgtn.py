@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import math
 from gcn import GCNConv
 import torch_sparse
-from torch_geometric.utils import softmax
+from torch_geometric.utils import softmax #needs torch.geometric v 2.0.4
 from utils import _norm, generate_non_local_graph
 import os
 class FastGTNs(nn.Module):

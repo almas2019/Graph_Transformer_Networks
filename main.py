@@ -413,18 +413,19 @@ if __name__ == '__main__':
             all_valid_micro_f1s.append(valid_micro_f1s)
             all_test_macro_f1s.append(test_macro_f1s)
             all_test_micro_f1s.append(test_micro_f1s)
+            write_metric_csv(output_folder, date_time, args, all_epochs_list, all_runs_list, all_train_losses, all_valid_losses, all_test_losses,
+                    all_train_macro_f1s, all_train_micro_f1s, all_valid_macro_f1s, all_valid_micro_f1s, all_test_macro_f1s, all_test_micro_f1s)
         
         # Save the model with
             if args.non_local:
                 torch.save(tmp, os.path.join(output_folder, date_time + '_' + args.model + '_non_local_' + args.dataset + '_best.pt'))
-                with open(os.path.join(output_folder,'args.pkl', 'wb')) as f:
+                with open(os.path.join(output_folder+'/args.pkl'), 'wb') as f:
                     pickle.dump(args, f)
             else:
                 torch.save(tmp, os.path.join(output_folder, date_time + '_' + args.model + '_' + args.dataset +'_' + args.save_model_mode+'.pt'))
-                with open(os.path.join(output_folder,'args.pkl', 'wb')) as f:
+                with open(os.path.join(output_folder+'/args.pkl'), 'wb') as f:
                     pickle.dump(args, f)
-            write_metric_csv(output_folder, date_time, args, all_epochs_list, all_runs_list, all_train_losses, all_valid_losses, all_test_losses,
-                                all_train_macro_f1s, all_train_micro_f1s, all_valid_macro_f1s, all_valid_micro_f1s, all_test_macro_f1s, all_test_micro_f1s)
+
 
 
 # model_save_path= os.path.join(output_folder,f'{args.model}_{num_layers}_{num_channels}_{args.runs}.pt')
