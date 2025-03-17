@@ -3,6 +3,7 @@ import altair as alt
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 def load_layer_tensors(output_folder, num_layers, split_type, run_number):
     layer_tensors = []
 
@@ -48,25 +49,33 @@ def create_heatmap(layer_averages, labels, output_folder, split_type, run_number
     heatmap.save(output_folder + f'{split_type}_{run_number}_heatmap_500_epochs.html') # add epoch parameter after
 
     # Seaborn heatmap
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(5, 5))
+
+    
+    plt.rc('font', **{'family': 'sans-serif', 'sans-serif': ['Calibre'], 'size':'8'})
+    new_rc_params = {'text.usetex': False,
+        "svg.fonttype": 'none'
+        }
+    mpl.rcParams.update(new_rc_params)
     df_pivot = df.pivot(index='Label', columns='Layer', values='Value')  # Pivot the DataFrame
     sns.heatmap(data=df_pivot,
                 cmap='Blues',
                 cbar_kws={'label': 'Value'},
-                annot=True,
+                annot=False,
                 fmt=".2f")
     
     # Rotate y-axis labels to make them horizontal
     plt.yticks(rotation=0)
-    plt.title('Heatmap of Filters')
+   # plt.title('Heatmap of Weights of Each Layer')
     plt.xlabel('Layer')
     plt.ylabel('Label')
+    plt.tight_layout()
 
     # Save as PNG
-    plt.savefig(output_folder + f'heatmap_epoch_500_{split_type}_{run_number}.png')
+    plt.savefig(output_folder + f'heatmap_epoch_500_{split_type}_{run_number}.png',dpi=500)
 
     # Save as SVG
-    plt.savefig(output_folder + f'heatmap_epoch_500_{split_type}_{run_number}.svg', format='svg')
+    plt.savefig(output_folder + f'heatmap_epoch_500_{split_type}_{run_number}.svg', format='svg', dpi=300)
 
     # Clear the plot for the next iteration
     plt.clf()
@@ -82,12 +91,12 @@ def run_for_each_model(dataset_nm, labels, num_layers, split_type, run_number):
 
 labels_imdb = ['MD', 'DM', 'MA', 'AM', 'I']
 labels_dblp = ['PA', 'AP', 'PC', 'CP', 'I']
-labels_acm = ['PA', 'AP', 'PS', 'SP', 'I']
-labels_graph_het_subsampled_tcell_fib4 = ['t-t', 'f-f', 'bridge', 't-f', 'I']
-labels_graph_het_subsampled_tcell_fib5 = ['t-t', 'f-f', 'bridge', 't-f', 'I']
-labels_graph_het_subsampled_tcell_fib3 = ['t-t', 'f-f', 't-f','I']
-labels_graph_het_subsampled_tcell_fib2 = ['t-t', 'f-f', 't-f','f-t','I']
-labels_graph_het_subsampled_tcell_fib = ['t-t', 'f-f', 't-f','I']
+labels_acm = ['PA', 'AP', 'PS', 'SP', 'I']ƒ
+labels_graph_het_subsampled_tcell_fib4 = ['T-T', 'F-F', 'Bridge', 'T-F', 'I']
+labels_graph_het_subsampled_tcell_fib5 = ['T-T', 'F-F', 'Bridge', 'T-F', 'I']
+labels_graph_het_subsampled_tcell_fib3 = ['T-T', 'F-F', 'T-F','I']
+labels_graph_het_subsampled_tcell_fib2 = ['T-T', 'F-F', 'T-F','F-T','I']
+labels_graph_het_subsampled_tcell_fib = ['T-T', 'F-F', 'T-F','I']
 run_for_each_model("IMDB", labels_imdb, 4, "train", 1)
 run_for_each_model("DBLP", labels_dblp, 4, "train", 1)
 run_for_each_model("ACM", labels_acm, 3, "train", 1)
