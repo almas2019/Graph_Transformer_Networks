@@ -49,7 +49,7 @@ def create_heatmap(layer_averages, labels, output_folder, split_type, run_number
     heatmap.save(output_folder + f'{split_type}_{run_number}_heatmap_500_epochs.html') # add epoch parameter after
 
     # Seaborn heatmap
-    plt.figure(figsize=(5, 5))
+    plt.figure(figsize=(3, 2))
 
     
     plt.rc('font', **{'family': 'sans-serif', 'sans-serif': ['Calibre'], 'size':'8'})
